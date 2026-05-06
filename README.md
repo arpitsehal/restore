@@ -1,36 +1,37 @@
 # Let's Restore 🕒
 
-A robust file versioning and restoration system that allows you to track changes in local directories and restore previous versions of files or entire folders with ease.
+> **⚠️ Work in Progress**: This project is currently under active development. Expect frequent updates and experimental features.
 
-## 🚀 Features
+**Let's Restore** is a robust, local-first file versioning and restoration system. Think of it as "Git for everyone"—it allows you to track changes in any local directory and restore previous versions of files or entire folders with a single click. No accounts, no cloud, just pure local protection.
 
-- **Real-time Monitoring**: High-performance C++ watcher detects file changes instantly.
-- **Version History**: Automatically creates snapshots of your files as they change.
-- **Smart Restoration**: Restore individual files or entire directory structures to any previous point in time.
-- **Cross-Platform Core**: Built with Electron, React, and Node.js for a seamless desktop experience.
-- **Minimalist UI**: Clean, glassmorphic dashboard for managing your tracked folders and versions.
+## 🚀 Key Features
+
+- **Real-time Syncing**: High-performance watcher detects file changes instantly and protects your work as you go.
+- **Visual Version Timeline**: Browse through snapshots of your files with a clean, intuitive history view.
+- **Smart Restoration**: Accidentally deleted a file? Modified something you shouldn't have? Restore individual files or entire directory structures to any previous point in time.
+- **Local-First Architecture**: All versions are stored in a hidden `.restorex` folder inside your directory. Your data never leaves your machine.
+- **Premium UI**: A modern, minimalist glassmorphic dashboard built for speed and clarity.
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React + Vite
+- **Frontend**: React + Vite (Vanilla CSS for styling)
 - **Backend**: Node.js + Express
 - **Desktop Wrapper**: Electron
-- **File Watcher**: Custom C++ implementation for low-latency monitoring
+- **Native Core**: Custom C++ implementation for low-latency file monitoring
 
-## 📂 Project Structure
+## 📂 How It Works
 
-- `frontend/`: React-based user interface.
-- `backend/`: Node.js server handling file logic and versioning.
-- `electron/`: Main process and bridge for the desktop application.
-- `watcher/`: Native C++ watcher source code.
+When you start syncing a folder, the app creates a hidden `.restorex` directory:
+- `versions/`: Stores compressed/full copies of your files timestamped for recovery.
+- `metadata.json`: A local database tracking every change, version ID, and file status.
 
 ## 🏁 Getting Started
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn
-- C++ compiler (for building the watcher if modified)
+- **Node.js**: v16 or higher
+- **npm**: for dependency management
+- **C++ Compiler**: (Optional) if you wish to rebuild the native watcher component
 
 ### Installation
 
@@ -39,7 +40,7 @@ A robust file versioning and restoration system that allows you to track changes
    git clone https://github.com/arpitsehal/restore.git
    ```
 
-2. Install dependencies:
+2. Install dependencies for all components:
    ```bash
    npm install
    cd frontend && npm install
@@ -49,12 +50,18 @@ A robust file versioning and restoration system that allows you to track changes
 
 ### Running the App
 
-To start the development environment (backend, frontend, and electron):
+To launch the full development environment (Frontend, Backend, and Electron):
 
 ```bash
 ./start-dev.bat
 ```
 
+## 🤝 Contributing
+
+Contributions are welcome! Since this is a work in progress, feel free to open issues or submit pull requests to help improve the system.
+
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+

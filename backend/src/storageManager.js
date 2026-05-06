@@ -38,7 +38,7 @@ class StorageManager {
     await this._ensureMetadata(normalized);
     await this.performInitialScan(normalized);
   }
-
+  async performInitialScan(watchPath) {
     const wp = watchPath.toLowerCase();
     this.isScanning = true;
     try {
@@ -154,8 +154,25 @@ class StorageManager {
     if (!this.metaCache[wp]) {
       try {
         if (await fs.pathExists(mf)) {
-          this.metaCache[wp] = await fs.readJson(mf);
-          console.log(`[StorageManager] Loaded metadata from ${mf} (${Object.keys(this.metaCache[wp].files).length} files)`);
+          const data = await fs.readJson(mf);
+          let migrated = false;
+          Object.values(data.files || {}).forEach(file => {
+            if (file.currentStatus === 'created') {
+              file.currentStatus = 'synced';
+              migrated = true;
+            }
+            if (file.versions) {
+              file.versions.forEach(v => {
+                if (v.status === 'created') {
+                  v.status = 'synced';
+                  migrated = true;
+                }
+              });
+            }
+          });
+          if (migrated) await fs.writeJson(mf, data, { spaces: 2 });
+          this.metaCache[wp] = data;
+          console.log(`[StorageManager] Loaded metadata from ${mf} (${Object.keys(this.metaCache[wp].files).length} files)${migrated ? ' [Migrated created -> synced]' : ''}`);
         } else {
           this.metaCache[wp] = { files: {} };
           await fs.ensureDir(path.dirname(mf));

@@ -150,7 +150,7 @@ class VersionEngine {
         versionId: uuidv4(),
         timestamp,
         size: stat.size,
-        status: 'created',
+        status: 'synced',
         storagePath,
       });
       console.log(`[Baseline] Created for: ${relPath}`);

@@ -24,6 +24,6 @@ export function formatRelative(ts) {
 }
 
 export function statusClass(status) {
-  const map = { active:'active', modified:'modified', deleted:'deleted', created:'created' };
+  const map = { active:'active', modified:'modified', deleted:'deleted', created:'created', synced:'synced' };
   return `badge badge-${map[status] || 'active'}`;
 }
