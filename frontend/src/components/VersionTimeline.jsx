@@ -21,8 +21,11 @@ export default function VersionTimeline({ file, versions, loading, onRestored })
   const dotClass = (status) => {
     if (status === 'modified') return 'modified';
     if (status === 'deleted') return 'deleted';
+    if (status === 'restored') return 'created';
     return 'created';
   };
+
+  const latestVersion = versions[0];
 
   return (
     <div>
@@ -64,44 +67,58 @@ export default function VersionTimeline({ file, versions, loading, onRestored })
         </div>
       ) : (
         <div className="timeline">
-          {versions.map((v, i) => (
-            <div key={v.versionId} className="timeline-item">
-              <div className={`timeline-dot ${dotClass(v.status)}`} />
-              <div className="timeline-card">
-                <div className="timeline-card-top">
-                  <div>
-                    <span className={statusClass(v.status)}>{v.status}</span>
-                    <div className="timeline-time" style={{ marginTop: 4 }}>{formatTs(v.timestamp)}</div>
+          {versions.map((v, i) => {
+            const isCurrentlyRestored = v.versionId === file.lastRestoredVersionId && 
+                                       latestVersion?.status === 'restored' && 
+                                       latestVersion?.restoredFrom === v.versionId;
+
+            return (
+              <div key={v.versionId} className="timeline-item">
+                <div className={`timeline-dot ${dotClass(v.status)}`} />
+                <div className="timeline-card">
+                  <div className="timeline-card-top">
+                    <div>
+                      <span className={statusClass(v.status)}>{v.status}</span>
+                      <div className="timeline-time" style={{ marginTop: 4 }}>{formatTs(v.timestamp)}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div className="timeline-size">{formatSize(v.size)}</div>
+                      {i === 0 && <div style={{ fontSize: 10, color: 'var(--accent2)', marginTop: 2 }}>LATEST</div>}
+                    </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div className="timeline-size">{formatSize(v.size)}</div>
-                    {i === 0 && <div style={{ fontSize: 10, color: 'var(--accent2)', marginTop: 2 }}>LATEST</div>}
-                  </div>
-                </div>
-                {v.storagePath && (
-                  <div className="timeline-actions">
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() => setRestoring({ file, version: v })}
-                    >
-                      Restore
-                    </button>
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => setRestoring({ file, version: { ...v, _asCopy: true } })}
-                    >
-                      Restore as copy
-                    </button>
-                  </div>
-                )}
+                  {v.storagePath && (
+                    <div className="timeline-actions">
+                      {isCurrentlyRestored ? (
+                        <div style={{ fontSize: 11, color: 'var(--green)', fontWeight: 600, padding: '4px 0' }}>
+                          ✓ Restored successfully
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => setRestoring({ file, version: v })}
+                          >
+                            Restore
+                          </button>
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => setRestoring({ file, version: { ...v, _asCopy: true } })}
+                          >
+                            Restore as copy
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 {!v.storagePath && v.status === 'deleted' && (
                   <div style={{ marginTop: 8, fontSize: 11, color: 'var(--red)' }}>
-                    Note: Deletion event — recover using the version above
+                    Note: Deletion event — restore using a previous version
                   </div>
                 )}
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       )}
 

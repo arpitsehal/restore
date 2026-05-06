@@ -24,6 +24,7 @@ class VersionEngine {
     this.debounceMap = new Map();
     this.DEBOUNCE_MS = 600;
     this.activeTasks = 0;
+    this.pendingRestores = new Map(); // path -> versionId
   }
 
   isSyncing() {
@@ -91,14 +92,24 @@ class VersionEngine {
         await fs.ensureDir(storageDir);
         await fs.copy(fullPath, storagePath);
 
+        const restoredFrom = this.pendingRestores.get(relPath);
+        const finalStatus = restoredFrom ? 'restored' : action;
+        this.pendingRestores.delete(relPath);
+
         await storageManager.addVersion(relPath, {
           versionId,
           timestamp,
           size: stat.size,
-          status: action,
+          status: finalStatus,
           storagePath,
+          restoredFrom,
         });
-        console.log(`[+] Versioned ${action}: ${relPath}`);
+
+        if (restoredFrom) {
+          await storageManager.upsertFile(relPath, { lastRestoredVersionId: restoredFrom });
+        }
+
+        console.log(`[+] Versioned ${finalStatus}: ${relPath}`);
       } catch (err) {
         console.warn(`[VersionEngine] Could not version ${relPath}:`, err.message);
       }
@@ -183,11 +194,17 @@ class VersionEngine {
     }
 
     await fs.ensureDir(path.dirname(destination));
+    if (!asCopy && !targetPath) {
+      this.pendingRestores.set(file.relativePath, versionId);
+    }
     await fs.copy(version.storagePath, destination);
 
     // If restoring to original location, update status
     if (!asCopy && !targetPath) {
-      await storageManager.upsertFile(file.relativePath, { currentStatus: 'active' });
+      await storageManager.upsertFile(file.relativePath, { 
+        currentStatus: 'active',
+        lastRestoredVersionId: versionId 
+      });
     }
 
     return { restoredTo: destination };
