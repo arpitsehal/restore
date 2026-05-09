@@ -87,7 +87,12 @@ class StorageManager {
         if (file.currentStatus !== 'deleted' && !dirMap.has(relPath)) {
           console.log(`[StorageManager] Detected missing file during scan: ${relPath}`);
           file.currentStatus = 'deleted';
-          file.lastSeen = new Date().toISOString();
+          
+          let deletionTime = new Date(file.lastSeen);
+          // Add 1 millisecond to ensure it appears after the last active version
+          deletionTime = new Date(deletionTime.getTime() + 1);
+
+          file.lastSeen = deletionTime.toISOString();
           // Add a deletion version marker
           file.versions.push({
               versionId: uuidv4(),
